@@ -1,0 +1,29 @@
+{
+  "name": "e-shop",
+  "version": "1.0.0",
+  "description": "Create an e-commerce platform using Node.js that allows users to browse, search, and purchase products. In this application have two main modules, Admin & Customer. The platform should have authentication, validation, and file upload features. Users should be able to upload their profile picture, which will be stored in the server. The app will automatically resize the files or images to a specific size for consistency. The platform should also have an email feature that sends a confirmation email to the user after they make a purchase. Additionally, the platform should have a feature to send an email notification to the user when the order is shipped or delivered. Priority 1) CRUD User & Products 2) User & Products Filter, Sorting, Pagination & search. 3) Authentication & Resource protection 4) File upload(Multer) 5) Email Functionality",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "mongoose": "^7.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srikanth019/e-shop.git"
+  },
+  "author": "Srikanth Golla",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/srikanth019/e-shop/issues"
+  },
+  "homepage": "https://github.com/srikanth019/e-shop#readme"
+}
