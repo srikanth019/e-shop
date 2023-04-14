@@ -8,7 +8,7 @@ router.get('/', userControllere.getProducts);
 
 router.get('/cart', userControllere.getCart);
 
-router.post('/cart', userControllere.postCart)
+router.post('/cart/:id', userControllere.postCart)
 
 router.get('/orders', userControllere.getOrders);
 

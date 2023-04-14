@@ -1,3 +1,4 @@
+const product = require("../models/product");
 const Product = require("../models/product");
 
 exports.getProducts = (req, res, next) => {
@@ -12,13 +13,26 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-    res.send("Cart Items")
-}
+  res.send("Cart Items");
+};
 
 exports.postCart = (req, res, next) => {
-    res.send("Product added to cart")
-}
+  const prodId = req.params.id;
+//   console.log(prodId);
+  Product.findById({_id: prodId})
+    .then((product) => {
+        console.log(product);
+      return req.user.addToCart(product);
+    })
+    .then((result) => {
+      console.log(result);
+      res.send("Product added to cart");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
 
 exports.getOrders = (req, res, next) => {
-    res.send("Orderd Items")
-}
+  res.send("Orderd Items");
+};
