@@ -1,18 +1,15 @@
-// const express = require('express');
+const express = require('express');
 
-// const router = express.Router();
+const router = express.Router();
 
-// const adminControllere = require('../controller/admin')
+const userControllere = require('../controller/user');
 
-// router.get('/', adminControllere.getProducts);
+router.get('/', userControllere.getProducts);
 
-// router.post('/', adminControllere.postProduct);
+router.get('/cart', userControllere.getCart);
 
-// // router.get('/:id', userControllere.getProduct);
+router.post('/cart', userControllere.postCart)
 
-// // router.patch('/:id', userControllere.updateProduct);
+router.get('/orders', userControllere.getOrders);
 
-// // router.delete('/:id', userControllere.deleteProduct);
-
-
-// module.exports = router;
+module.exports = router;

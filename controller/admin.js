@@ -1,10 +1,11 @@
-const product = require("../models/product");
 const Product = require("../models/product");
+const User = require('../models/user')
 
 exports.getProducts = (req, res, next) => {
   Product.find()
     .then((products) => {
       console.log("Products Fetched");
+      console.log(products);
       res.status(200).json({ msg: "Products Fetched", products: products });
     })
     .catch((err) => {
@@ -23,6 +24,7 @@ exports.postProduct = (req, res, next) => {
     imageUrl: imageUrl,
     price: price,
     description: description,
+    userId: req.user
   });
   product
     .save()
