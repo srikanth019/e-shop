@@ -61,16 +61,16 @@ app.use(pageNotFound);
 mongoose
   .connect(MongoURL)
   .then(() => {
-    User.findOne().then((user) => {
-      if (!user) {
-        const user = new User({
-          name: "Srikanth",
-          email: "srikanth@test.com",
-          password: "1234",
-        });
-        user.save();
-      }
-    });
+    // User.findOne().then((user) => {
+    //   if (!user) {
+    //     const user = new User({
+    //       name: "Srikanth",
+    //       email: "srikanth@test.com",
+    //       password: "1234",
+    //     });
+    //     user.save();
+    //   }
+    // });
     app.listen(port, () => {
       console.log("Server running on", port);
     });
