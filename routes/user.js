@@ -6,6 +6,8 @@ const userControllere = require('../controller/user');
 
 router.get('/', userControllere.getProducts);
 
+router.get('/:id', userControllere.getProduct);
+
 router.get('/cart', userControllere.getCart);
 
 router.post('/cart/:id', userControllere.postCart);
