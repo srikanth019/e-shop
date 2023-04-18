@@ -1,6 +1,8 @@
 const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require('../models/order');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -14,6 +16,7 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getProduct = (req, res, next) => {
+  // console.log(req.user);
   const productId = req.params.id;
   Product.find({ _id: productId })
     .then((product) => {
@@ -28,15 +31,20 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  req.user
-    .populate("cart.items.productId")
-    // .execPopulate()
-    .then((user) => {
-      const products = user.cart.items;
-      console.log(products);
-      res.json({msg: "Cart Items", cartProducts: products});
-    })
-    .catch((err) => console.log(err));
+  // const id = req.user._id;
+  console.log('----user---',req.user.cart.items);
+  const user = User.find({_id: req.user._id})
+  // console.log('user', user);
+  // req.user
+  //   .populate(new ObjectId('64391b13058c604aeab4b08b'))
+  //   // .execPopulate()
+  //   .then((user) => {
+  //     console.log(user)
+  //     const products = user.cart.items;
+  //     console.log(products);
+  //     res.json({msg: "Cart Items", cartProducts: products});
+  //   })
+    //.catch((err) => console.log(err));
   // req.user.populate('cart.items').then((user) => {
   //   const products = user.cart.items
   //   .map(i => {

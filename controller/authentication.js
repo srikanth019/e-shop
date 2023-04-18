@@ -1,6 +1,14 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
-const { use } = require("../routes/authentication");
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: 'mailto:srikanth.golla@brainvire.com',
+      pass: 'Srik@nth19'
+  }
+});
 
 exports.postSignUp = (req, res, next) => {
   const name = req.body.name;
@@ -11,7 +19,7 @@ exports.postSignUp = (req, res, next) => {
       // console.log(userDoc);
       if (userDoc) {
         return res.json({
-          msg: "This E-mail Already Exit. Please Pick Another.",
+          msg: "This E-mail Already Exit. Please Pick Another."
         });
       }
       return bcrypt
@@ -27,6 +35,23 @@ exports.postSignUp = (req, res, next) => {
         })
         .then((response) => {
           // console.log(response);
+          var mailOptions = {
+            to: email,
+            from: 'mailto:srikanth.golla@brainvire.com',
+            subject: "You are successfully Signedup",
+            text: 'Hello from Node-Project',
+            html: `<h1>You Successfully Signedup Node E-Shop PlatForm.</h1>
+                <p>Your password is: "${password}" </p>
+                <p>Thank You</p>
+            `
+          }
+          transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
           res.json({ msg: "SignUp Successfully", status: response });
         })
         .catch((err) => {
@@ -43,9 +68,9 @@ exports.postLogin = (req, res, next) => {
   const password = req.body.password;
   User.findOne({ email: email })
     .then((user) => {
-      console.log(user);
+      // console.log(user);
       if (!user) {
-        return res.json({ msg: "Incorrect E-Mail" });
+        return res.json({ msg: "Incorrect E-Mail!!!" });
       }
       bcrypt
         .compare(password, user.password)

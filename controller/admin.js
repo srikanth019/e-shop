@@ -85,11 +85,11 @@ exports.updateProduct = (req, res, next) => {
 exports.deleteProduct = (req, res, next) => {
   const productId = req.params.id;
   Product.findByIdAndDelete({ _id: productId })
-    .then((product) => {
+    .then((result) => {
       // if (!product) {
       //   res.json({ msg: "Product is Not Founded" });
       // }
-      res.json({ msg: "Product Deleted" });
+      res.json({ msg: "Product Deleted", status: result});
     })
     .catch((err) => {
       console.log(err);
