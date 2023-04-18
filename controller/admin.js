@@ -1,11 +1,12 @@
+const product = require("../models/product");
 const Product = require("../models/product");
-const User = require('../models/user')
+const User = require("../models/user");
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product.find({ userId: req.user._id })
     .then((products) => {
       console.log("Products Fetched");
-      console.log(products);
+      // console.log(products);
       res.status(200).json({ msg: "Products Fetched", products: products });
     })
     .catch((err) => {
@@ -24,7 +25,7 @@ exports.postProduct = (req, res, next) => {
     imageUrl: imageUrl,
     price: price,
     description: description,
-    userId: req.session.user
+    userId: req.session.user,
   });
   product
     .save()
@@ -60,6 +61,11 @@ exports.updateProduct = (req, res, next) => {
 
   Product.findByIdAndUpdate({ _id: productId })
     .then((product) => {
+      if (product.userId.toString() !== req.user._id.toString()) {
+        return res.json({
+          msg: "You are not Authorised to edit This Product!!.",
+        });
+      }
       product.title = updatedTitle;
       product.imageUrl = updatedImageUrl;
       product.price = updatedPrice;
@@ -84,12 +90,24 @@ exports.updateProduct = (req, res, next) => {
 
 exports.deleteProduct = (req, res, next) => {
   const productId = req.params.id;
-  Product.findByIdAndDelete({ _id: productId })
-    .then((result) => {
-      // if (!product) {
-      //   res.json({ msg: "Product is Not Founded" });
-      // }
-      res.json({ msg: "Product Deleted", status: result});
+  Product.find({_id: productId})
+    .then((product) => {
+      // console.log(product);
+      if (product.userId !== req.user._id.toString()) {
+        return res.json({
+          msg: "You are not Authorised to Delete This Product!!.",
+        });
+      }
+      Product.deleteOne({ _id: productId, userId: req.user._id })
+        .then((result) => {
+          // if (!product) {
+          //   res.json({ msg: "Product is Not Founded" });
+          // }
+          res.json({ msg: "Product Deleted", status: result });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     })
     .catch((err) => {
       console.log(err);

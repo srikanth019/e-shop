@@ -18,11 +18,13 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
   // console.log(req.user);
   const productId = req.params.id;
-  Product.find({ _id: productId })
+  // Product.find({ _id: productId })
+  Product.findById(productId)
     .then((product) => {
       if (!product) {
         res.send("Product not found with this Id:", productId);
       }
+      console.log("Fetched single product")
       res.status(200).json({ msg: "Product Fetched", product: product });
     })
     .catch((err) => {
@@ -30,36 +32,19 @@ exports.getProduct = (req, res, next) => {
     });
 };
 
-exports.getCart = (req, res, next) => {
-  // const id = req.user._id;
-  console.log('----user---',req.user.cart.items);
-  const user = User.find({_id: req.user._id})
-  // console.log('user', user);
-  // req.user
-  //   .populate(new ObjectId('64391b13058c604aeab4b08b'))
-  //   // .execPopulate()
-  //   .then((user) => {
-  //     console.log(user)
-  //     const products = user.cart.items;
-  //     console.log(products);
-  //     res.json({msg: "Cart Items", cartProducts: products});
-  //   })
-    //.catch((err) => console.log(err));
-  // req.user.populate('cart.items').then((user) => {
-  //   const products = user.cart.items
-  //   .map(i => {
-  //     return { product: {...i.productId._doc}, quantity: i.quantity}
-  //   });
-  //   console.log(products);
-  // }).catch(err => {
-  //   console.log(err);
-  // })
-};
+exports.cartProducts = (req,res) => {
+  res.send("Hello");
+}
+
+// exports.getCart = (req, res, next) => {
+//   res.json({msg: "Cart Products"});
+// }
 
 exports.postCart = (req, res, next) => {
   const prodId = req.params.id;
   //   console.log(prodId);
-  Product.findById({ _id: prodId })
+  // Product.findById({ _id: prodId })
+  Product.findById(prodId)
     .then((product) => {
       console.log(product);
       return req.user.addToCart(product);

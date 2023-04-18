@@ -77,7 +77,7 @@ exports.postLogin = (req, res, next) => {
         .then((match) => {
           console.log(match);
           if (match) {
-            req.session.isLogin = true;
+            // req.session.isLogin = true;
             req.session.user = user;
             res.json({ msg: "Login Successfully" });
           }
