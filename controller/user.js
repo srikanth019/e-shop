@@ -2,7 +2,15 @@ const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require("../models/order");
 const mongoose = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId;
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "mailto:srikanth.golla@brainvire.com",
+    pass: "Srik@nth19",
+  },
+});
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -81,6 +89,7 @@ exports.deleteProductFromCart = (req, res, next) => {
 };
 
 exports.postOrder = async (req, res, next) => {
+  const email = req.user.email;
   const cartItems = await User.find({ _id: req.user._id }).populate({
     path: "cart.items.productId",
     select: "title price description imageUrl userId",
@@ -125,6 +134,22 @@ exports.postOrder = async (req, res, next) => {
     const CreatedOrder = await order.save();
     await req.user.clearCart();
     console.log("Order created");
+    var mailOptions = {
+      to: email,
+      from: "mailto:srikanth.golla@brainvire.com",
+      subject: "Your Order has been Successfully Placed.",
+      text: "Hello from Node-Project",
+      html: `<h1>You will get your order as soon as Possible </h1>
+          <p>Thank You</p>
+      `,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
     res.json({ msg: "Order created", order: CreatedOrder });
   }
 };
