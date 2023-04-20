@@ -1,3 +1,5 @@
+const path = require("path");
+
 const express = require("express"); // To Configure the Routes and Server Logic
 
 const mongoose = require("mongoose"); //To work with mongoDB Database
@@ -8,12 +10,17 @@ const session = require("express-session"); //For Creating Sessions
 
 const MogoStore = require("connect-mongodb-session")(session); //To store Sessions in Database
 
+const multer = require("multer");
+
+const bodyparser = require("body-parser");
+
+const User = require("./models/user");
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/authentication");
 const pageNotFound = require("./middleware/404");
 
-const User = require("./models/user");
+const authControllere = require('./controller/authentication');
 
 const port = process.env.PORT;
 const MongoURL = process.env.MONGO_URL;
@@ -25,9 +32,37 @@ const store = new MogoStore({
   collection: "sessions",
 });
 
+const diskStore = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "./public/profilePics"), (err, res) => {
+      if (err) throw err;
+    });
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + "-" + file.originalname, (err, res) => {
+      if (err) throw err;
+    });
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+      cb(null, true);
+  } else {
+      cb(null, false);
+  }
+}
+
+const upload = multer({storage: diskStore, fileFilter: fileFilter});
+
 //for getting input json data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyparser.json());
+app.use(bodyparser.urlencoded({ extended: true }));
+
+app.use(express.static("public"));
+
 // session Middleware
 app.use(
   session({
@@ -56,6 +91,7 @@ app.use((req, res, next) => {
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1", userRoutes);
 app.use("/api/v1", authRoutes);
+app.use("/api/v1/signup",upload.single('profilePic'),authControllere.postSignUp);
 app.use(pageNotFound);
 
 mongoose

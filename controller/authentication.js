@@ -14,6 +14,7 @@ exports.postSignUp = (req, res, next) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
+  const profilePic = req.file.filename;
   User.findOne({ email: email })
     .then((userDoc) => {
       // console.log(userDoc);
@@ -29,6 +30,7 @@ exports.postSignUp = (req, res, next) => {
             name: name,
             email: email,
             password: hashPass,
+            profilePic: profilePic,
             cart: { items: [] },
           });
           return user.save();

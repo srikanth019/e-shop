@@ -3,12 +3,14 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
+require("dotenv").config()
+const PassWord = process.env.EMAIL_PASS;
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "mailto:srikanth.golla@brainvire.com",
-    pass: "Srik@nth19",
+    pass: PassWord,
   },
 });
 
@@ -89,68 +91,72 @@ exports.deleteProductFromCart = (req, res, next) => {
 };
 
 exports.postOrder = async (req, res, next) => {
-  const email = req.user.email;
-  const cartItems = await User.find({ _id: req.user._id }).populate({
-    path: "cart.items.productId",
-    select: "title price description imageUrl userId",
-  });
-  // console.log(cartItems);
-  if (cartItems[0].cart.items.length <= 0) {
-    return res.json({ msg: "Cart is Empty" });
-  } else {
-    let finalAmount = 0;
-    let finalQuantity = 0;
-    let FinalProducts = [];
-    const products = cartItems[0].cart.items.map((i) => {
-      return {
-        product: i.productId,
-        quantity: i.quantity,
-        totalAmount: i.productId.price * i.quantity,
-      };
+  try {
+    const email = req.user.email;
+    const cartItems = await User.find({ _id: req.user._id }).populate({
+      path: "cart.items.productId",
+      select: "title price description imageUrl userId",
     });
-    const total = products.map((i) => {
-      FinalProducts.push(i.product);
-      finalAmount = finalAmount + i.totalAmount;
-      finalQuantity = finalQuantity + i.quantity;
-      return {
-        FinalProducts: FinalProducts,
-        finalAmount: finalAmount,
-        finalQuantity: finalQuantity,
-      };
-    });
-    const order = new Order({
-      user: {
-        name: req.user.name,
-        userId: req.user._id,
-      },
-      orderData: [
-        {
-          product: FinalProducts,
-          quantity: finalQuantity,
-          totalAmount: finalAmount,
+    // console.log(cartItems);
+    if (cartItems[0].cart.items.length <= 0) {
+      return res.json({ msg: "Cart is Empty" });
+    } else {
+      let finalAmount = 0;
+      let finalQuantity = 0;
+      let FinalProducts = [];
+      const products = cartItems[0].cart.items.map((i) => {
+        return {
+          product: i.productId,
+          quantity: i.quantity,
+          totalAmount: i.productId.price * i.quantity,
+        };
+      });
+      const total = products.map((i) => {
+        FinalProducts.push(i.product);
+        finalAmount = finalAmount + i.totalAmount;
+        finalQuantity = finalQuantity + i.quantity;
+        return {
+          FinalProducts: FinalProducts,
+          finalAmount: finalAmount,
+          finalQuantity: finalQuantity,
+        };
+      });
+      const order = new Order({
+        user: {
+          name: req.user.name,
+          userId: req.user._id,
         },
-      ],
-    });
-    const CreatedOrder = await order.save();
-    await req.user.clearCart();
-    console.log("Order created");
-    var mailOptions = {
-      to: email,
-      from: "mailto:srikanth.golla@brainvire.com",
-      subject: "Your Order has been Successfully Placed.",
-      text: "Hello from Node-Project",
-      html: `<h1>You will get your order as soon as Possible </h1>
+        orderData: [
+          {
+            product: FinalProducts,
+            quantity: finalQuantity,
+            totalAmount: finalAmount,
+          },
+        ],
+      });
+      const CreatedOrder = await order.save();
+      await req.user.clearCart();
+      console.log("Order created");
+      var mailOptions = {
+        to: email,
+        from: "mailto:srikanth.golla@brainvire.com",
+        subject: "Your Order has been Successfully Placed.",
+        text: "Hello from Node-Project",
+        html: `<h1>You will get your order as soon as Possible </h1>
           <p>Thank You</p>
       `,
-    };
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Email sent: " + info.response);
-      }
-    });
-    res.json({ msg: "Order created", order: CreatedOrder });
+      };
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
+      });
+      res.json({ msg: "Order created", order: CreatedOrder });
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 
