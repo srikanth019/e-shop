@@ -1,9 +1,10 @@
 const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require("../models/order");
-const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
-require("dotenv").config()
+const { validationResult } = require('express-validator');
+require("dotenv").config();
+
 const PassWord = process.env.EMAIL_PASS;
 
 const transporter = nodemailer.createTransport({

@@ -14,13 +14,15 @@ const multer = require("multer");
 
 const bodyparser = require("body-parser");
 
+const { check, body, validationResult } = require("express-validator");
+
 const User = require("./models/user");
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/authentication");
 const pageNotFound = require("./middleware/404");
 
-const authControllere = require('./controller/authentication');
+const authControllere = require("./controller/authentication");
 
 const port = process.env.PORT;
 const MongoURL = process.env.MONGO_URL;
@@ -46,14 +48,18 @@ const diskStore = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
-      cb(null, true);
+  if (
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
+  ) {
+    cb(null, true);
   } else {
-      cb(null, false);
+    cb(null, false);
   }
-}
+};
 
-const upload = multer({storage: diskStore, fileFilter: fileFilter});
+const upload = multer({ storage: diskStore, fileFilter: fileFilter });
 
 //for getting input json data
 app.use(express.json());
@@ -91,7 +97,28 @@ app.use((req, res, next) => {
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1", userRoutes);
 app.use("/api/v1", authRoutes);
-app.use("/api/v1/signup",upload.single('profilePic'),authControllere.postSignUp);
+app.use(
+  "/api/v1/signup",
+  upload.single("profilePic"),
+  [
+    check("name").isAlphanumeric().isLength({ min: 3 }).trim(),
+    check("email", "Email Field is required").not().isEmpty(),
+    check("email")
+      .isEmail()
+      .withMessage("Please enter a valid E-mail")
+      .normalizeEmail()
+      .trim(),
+    body("password", "Password Field is required").not().isEmpty(),
+    body(
+      "password",
+      "Please Enter a password with Only numbers and text with atleast 4 characters"
+    )
+      .isLength({ min: 4, max: 10 })
+      .isAlphanumeric()
+      .trim(),
+  ],
+  authControllere.postSignUp
+);
 app.use(pageNotFound);
 
 mongoose
