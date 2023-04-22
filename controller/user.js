@@ -1,19 +1,7 @@
 const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require("../models/order");
-const nodemailer = require("nodemailer");
-const { validationResult } = require('express-validator');
-require("dotenv").config();
-
-const PassWord = process.env.EMAIL_PASS;
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "mailto:srikanth.golla@brainvire.com",
-    pass: PassWord,
-  },
-});
+const transporter = require('../middleware/email');
 
 exports.getProducts = (req, res, next) => {
   Product.find()

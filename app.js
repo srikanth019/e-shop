@@ -34,18 +34,20 @@ const store = new MogoStore({
   collection: "sessions",
 });
 
-const diskStore = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "./public/profilePics"), (err, res) => {
-      if (err) throw err;
-    });
-  },
-  filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + "-" + file.originalname, (err, res) => {
-      if (err) throw err;
-    });
-  },
-});
+// const diskStore = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, path.join(__dirname, "./public/profilePics"), (err, res) => {
+//       if (err) throw err;
+//     });
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, new Date().toISOString() + "-" + file.originalname, (err, res) => {
+//       if (err) throw err;
+//     });
+//   },
+// });
+
+const multerStorage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   if (
@@ -59,7 +61,8 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage: diskStore, fileFilter: fileFilter });
+const maxSize = 2 * 1024 * 1024;
+const upload = multer({ storage: multerStorage, fileFilter: fileFilter,limits: {fieldSize: maxSize} });
 
 //for getting input json data
 app.use(express.json());

@@ -1,79 +1,71 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
-const nodemailer = require('nodemailer');
-const { validationResult } = require('express-validator'); 
+const sharp = require("sharp");
+const { validationResult } = require("express-validator");
+const transporter = require("../middleware/email");
 
-const PassWord = process.env.EMAIL_PASS;
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-      user: 'mailto:srikanth.golla@brainvire.com',
-      pass: PassWord
-  }
-});
-
-exports.postSignUp = (req, res, next) => {
+exports.postSignUp = async (req, res, next) => {
+  const profileBuffer = req.file.buffer;
+  // const { format } = await sharp(profileBuffer).metadata();
+  const filename = req.file.originalname.replace(/\..+$/, "");
+  const newFilename = `profile-${filename}-${new Date().toISOString()}.jpeg`;
+  // console.log(filename, newFilename);
+  await sharp(profileBuffer)
+    .resize(360, 360)
+    .toFormat("jpeg")
+    .jpeg({ quality: 100 })
+    .toFile(`public/profilePics/${newFilename}`);
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
-  const profilePic = req.file.filename;
+  // const profilePic = req.file.filename;
+  const profilePic = newFilename;
 
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
     console.log(errors.array());
-    return res.json({status: "Some Error Occur", error: errors.array()[0].msg})
+    return res.json({
+      status: "Some Error Occur",
+      error: errors.array()[0].msg,
+    });
   }
 
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      // console.log(userDoc);
-      if (userDoc) {
-        return res.json({
-          msg: "This E-mail Already Exit. Please Pick Another."
-        });
-      }
-      return bcrypt
-        .hash(password, 12)
-        .then((hashPass) => {
-          const user = new User({
-            name: name,
-            email: email,
-            password: hashPass,
-            profilePic: profilePic,
-            cart: { items: [] },
-          });
-          return user.save();
-        })
-        .then((response) => {
-          // console.log(response);
-          var mailOptions = {
-            to: email,
-            from: 'mailto:srikanth.golla@brainvire.com',
-            subject: "You are successfully Signedup",
-            text: 'Hello from Node-Project',
-            html: `<h1>You Successfully Signedup Node E-Shop PlatForm.</h1>
+  const userDoc = await User.findOne({ email: email });
+  // console.log(userDoc);
+  if (userDoc) {
+    return res.json({
+      msg: "This E-mail Already Exit. Please Pick Another.",
+    });
+  }
+  const hashPass = await bcrypt.hash(password, 12);
+  const user = new User({
+    name: name,
+    email: email,
+    password: hashPass,
+    profilePic: profilePic,
+    cart: { items: [] },
+  });
+  const response = await user.save();
+  // console.log(response);
+  var mailOptions = {
+    to: email,
+    from: "mailto:srikanth.golla@brainvire.com",
+    subject: "You are successfully Signedup",
+    text: "Hello from Node-Project",
+    html: `<h1>You Successfully Signedup Node E-Shop PlatForm.</h1>
                 <p>Your password is: "${password}" </p>
                 <p>Thank You</p>
-            `
-          }
-          transporter.sendMail(mailOptions, function(error, info){
-            if (error) {
-              console.log(error);
-            } else {
-              console.log('Email sent: ' + info.response);
-            }
-          });
-          res.json({ msg: "SignUp Successfully", status: response });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    })
-    .catch((err) => {
-      console.log(err._message);
-    });
+            `,
+  };
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+  res.json({ msg: "SignUp Successfully", status: response });
 };
 
 exports.postLogin = (req, res, next) => {
@@ -94,7 +86,7 @@ exports.postLogin = (req, res, next) => {
             req.session.user = user;
             res.json({ msg: "Login Successfully" });
           }
-          if(!match){
+          if (!match) {
             return res.json({ msg: "failed to login , Incorrect password!!!" });
           }
         })
