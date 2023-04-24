@@ -4,7 +4,7 @@ const Order = require("../models/order");
 const transporter = require('../middleware/email');
 
 exports.getProducts = (req, res, next) => {
-  Product.find().skip(0).limit(2)
+  Product.find().populate('userId').skip(0).limit(0).sort({createdAt : -1})
     .then((products) => {
       console.log("Products Fetched");
       res.status(200).json({ msg: "Products Fetched", products: products });

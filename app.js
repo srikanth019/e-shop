@@ -10,11 +10,14 @@ const MogoStore = require("connect-mongodb-session")(session); //To store Sessio
 
 const bodyparser = require("body-parser");
 
-const User = require("./models/user");
+const server = require('./server');
+
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/authentication");
 const pageNotFound = require("./middleware/404");
+const sessionUser = require('./middleware/session-user');
+
 
 const port = process.env.PORT;
 const MongoURL = process.env.MONGO_URL;
@@ -45,19 +48,7 @@ app.use(
 );
 
 //Storing a user in req Object
-app.use((req, res, next) => {
-  if (!req.session.user) {
-    return next();
-  }
-  User.findById(req.session.user._id)
-    .then((reqUser) => {
-      req.user = reqUser;
-      next();
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
+app.use(sessionUser);
 
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1", userRoutes);
@@ -72,3 +63,5 @@ mongoose
     });
   })
   .catch((err) => console.log(err));
+
+// server();
