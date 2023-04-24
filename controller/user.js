@@ -4,7 +4,7 @@ const Order = require("../models/order");
 const transporter = require('../middleware/email');
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product.find().skip(0).limit(2)
     .then((products) => {
       console.log("Products Fetched");
       res.status(200).json({ msg: "Products Fetched", products: products });
@@ -37,6 +37,9 @@ exports.cartProducts = (req, res) => {
     })
     .then((cartItems) => {
       // console.log(cartItems);
+      if (cartItems[0].cart.items.length <= 0) {
+        return res.json({ msg: "No Products in Cart" });
+      }
       const products = cartItems[0].cart.items.map((i) => {
         return { product: i.productId, quantity: i.quantity };
       });

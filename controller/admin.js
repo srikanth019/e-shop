@@ -7,7 +7,7 @@ exports.getProducts = (req, res, next) => {
     .then((products) => {
       console.log("Products Fetched");
       // console.log(products);
-      res.status(200).json({ msg: "Products Fetched", products: products });
+      res.status(200).json({ msg: "Admin Products Fetched", products: products });
     })
     .catch((err) => {
       console.log(err);
