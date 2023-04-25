@@ -1,46 +1,11 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const sharp = require("sharp");
-const multer = require("multer");
+const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
-const transporter = require("../middleware/email");
+const transporter = require("../utils/email");
 
-const multerStorage = multer.memoryStorage();
-
-const fileFilter = (req, file, cb) => {
-  if (
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/jpg" ||
-    file.mimetype === "image/jpeg"
-  ) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
-
-const maxSize = 2 * 1024 * 1024;
-const upload = multer({
-  storage: multerStorage,
-  fileFilter: fileFilter,
-  limits: { fieldSize: maxSize },
-});
-
-const uploadProfile = upload.single("profilePic");
-
-exports.uploadUserProfile = (req, res, next) => {
-  upload.single("profilePic")(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      console.log(err);
-      return res.status(404).send(err + "Upload failed due to multer error");
-    } else if (err) {
-      console.log(err);
-      return res.status(404).send(err + "Upload failed due to unknown error");
-    }
-    // console.log("Every thing is fine with Fine Uploading");
-    next();
-  });
-};
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 exports.postSignUp = async (req, res, next) => {
   if (!req.file) {
@@ -70,7 +35,7 @@ exports.postSignUp = async (req, res, next) => {
   const userDoc = await User.findOne({ email: email });
   // console.log(userDoc);
   if (userDoc) {
-    return res.json({
+    return res.status(409).json({
       msg: "This E-mail Already Exit. Please Pick Another.",
     });
   }
@@ -85,7 +50,7 @@ exports.postSignUp = async (req, res, next) => {
 
   const user = new User({
     name: name,
-    email: email,
+    email: email.toLowerCase(),
     password: hashPass,
     profilePic: profilePic,
     cart: { items: [] },
@@ -115,28 +80,27 @@ exports.postSignUp = async (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+  let loadedUser;
   User.findOne({ email: email })
     .then((user) => {
       // console.log(user);
       if (!user) {
         return res.json({ msg: "Incorrect E-Mail!!!" });
       }
-      bcrypt
-        .compare(password, user.password)
-        .then((match) => {
-          console.log(match);
-          if (match) {
-            // req.session.isLogin = true;
-            req.session.user = user;
-            res.json({ msg: "Login Successfully" });
-          }
-          if (!match) {
-            return res.json({ msg: "failed to login , Incorrect password!!!" });
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      loadedUser = user;
+      return bcrypt.compare(password, user.password);
+    })
+    .then((match) => {
+      console.log(match);
+      if (match) {
+        // req.session.isLogin = true;
+        const token = jwt.sign({ loadedUser },ACCESS_TOKEN_SECRET, {expiresIn: '1h'});
+        // req.session.user = loadedUser;
+        res.json({ msg: "Login Successfully", token: token});
+      }
+      if (!match) {
+        return res.json({ msg: "failed to login , Incorrect password!!!" });
+      }
     })
     .catch((err) => {
       console.log(err.msg);

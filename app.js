@@ -1,7 +1,5 @@
 const express = require("express"); // To Configure the Routes and Server Logic
 
-const mongoose = require("mongoose"); //To work with mongoDB Database
-
 require("dotenv").config(); // to Srore the Env Variables
 
 const session = require("express-session"); //For Creating Sessions
@@ -10,14 +8,13 @@ const MogoStore = require("connect-mongodb-session")(session); //To store Sessio
 
 const bodyparser = require("body-parser");
 
-const server = require('./server');
+const connect = require("./server");
 
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/authentication");
 const pageNotFound = require("./middleware/404");
-const sessionUser = require('./middleware/session-user');
-
+const sessionUser = require("./middleware/session-user");
 
 const port = process.env.PORT;
 const MongoURL = process.env.MONGO_URL;
@@ -55,13 +52,17 @@ app.use("/api/v1", userRoutes);
 app.use("/api/v1", authRoutes);
 app.use(pageNotFound);
 
-mongoose
-  .connect(MongoURL)
-  .then(() => {
+const start = async () => {
+  try {
+    await connect();
     app.listen(port, () => {
-      console.log("Server running on", port);
+      console.log("listening on port:",port);
     });
-  })
-  .catch((err) => console.log(err));
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+};
 
-// server();
+start();
+

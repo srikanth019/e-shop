@@ -1,10 +1,10 @@
 const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require("../models/order");
-const transporter = require('../middleware/email');
+const transporter = require('../utils/email');
 
 exports.getProducts = (req, res, next) => {
-  Product.find().populate('userId').skip(0).limit(0).sort({createdAt : -1})
+  Product.find().populate('userId').skip(0).limit(2).sort({createdAt : -1})
     .then((products) => {
       console.log("Products Fetched");
       res.status(200).json({ msg: "Products Fetched", products: products });
