@@ -1,7 +1,7 @@
 const Product = require("../models/product");
 
 exports.getProducts = (req, res, next) => {
-  console.log(req.user);
+  // console.log(req.user);
   Product.find({ userId: req.user._id })
     .then((products) => {
       console.log("Products Fetched");

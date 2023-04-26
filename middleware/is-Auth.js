@@ -15,6 +15,7 @@ module.exports = async (req, res, next) => {
     if (!decodedToken) {
       return res.send("Not Authenticated");
     }
+    console.log(decodedToken);
     req.user = await User.findById(decodedToken.loadedUser._id);
     // const user = await User.findById(decodedToken.loadedUser._id);
     // let user = await User.updateOne(

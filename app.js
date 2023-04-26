@@ -4,6 +4,8 @@ require("dotenv").config(); // to Srore the Env Variables
 
 const session = require("express-session"); //For Creating Sessions
 
+const compression = require('compression');
+
 const MogoStore = require("connect-mongodb-session")(session); //To store Sessions in Database
 
 const bodyparser = require("body-parser");
@@ -44,7 +46,7 @@ app.use(
   })
 );
 
-//Storing a user in req Object
+app.use(compression());
 // app.use(sessionUser);
 
 app.use("/api/v1/admin", adminRoutes);
