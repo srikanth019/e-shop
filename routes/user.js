@@ -8,15 +8,15 @@ const isAuth = require("../middleware/is-Auth");
 
 router.get("/", userControllere.getProducts);
 
-router.get("/cart", userControllere.cartProducts);
+router.get("/cart",isAuth, userControllere.cartProducts);
 
-router.post("/cart/:id", userControllere.postCart);
+router.post("/cart/:id",isAuth,userControllere.postCart);
 
-router.delete("/cart/:id", userControllere.deleteProductFromCart);
+router.delete("/cart/:id",isAuth, userControllere.deleteProductFromCart);
 
-router.get("/order", userControllere.getOrders);
+router.get("/order", isAuth, userControllere.getOrders);
 
-router.post("/order", userControllere.postOrder);
+router.post("/order", isAuth, userControllere.postOrder);
 
 router.get("/:id", userControllere.getProduct);
 

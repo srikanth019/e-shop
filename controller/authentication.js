@@ -108,8 +108,12 @@ exports.postLogin = (req, res, next) => {
 };
 
 exports.postLogout = (req, res, next) => {
-  req.session.destroy((err) => {
-    // console.log(err);
-    res.send({ msg: "Logout Successfully" });
-  });
+  const bearerHeader = req.headers["authorization"];
+  if (!bearerHeader) {
+    return res.status(401).json({ msg: "Not authenticated" });
+  }
+  let token = bearerHeader.split(" ")[1];
+  // token = null;
+  console.log(token);
+  res.send({ msg: "Logout Successfully" });
 };

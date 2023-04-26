@@ -1,8 +1,7 @@
-const product = require("../models/product");
 const Product = require("../models/product");
-const User = require("../models/user");
 
 exports.getProducts = (req, res, next) => {
+  console.log(req.user);
   Product.find({ userId: req.user._id })
     .then((products) => {
       console.log("Products Fetched");
@@ -25,7 +24,7 @@ exports.postProduct = (req, res, next) => {
     imageUrl: imageUrl,
     price: price,
     description: description,
-    userId: req.session.user,
+    userId: req.user,
   });
   product
     .save()
@@ -63,7 +62,7 @@ exports.updateProduct = (req, res, next) => {
     .then((product) => {
       if (product.userId.toString() !== req.user._id.toString()) {
         return res.json({
-          msg: "You are not Authorised to edit This Product!!.",
+          msg: "You are not Authorised to edit This Product!!. Only Admin Can Do.",
         });
       }
       product.title = updatedTitle;
@@ -95,7 +94,7 @@ exports.deleteProduct = (req, res, next) => {
       // console.log(product);
       if (product.userId !== req.user._id.toString()) {
         return res.json({
-          msg: "You are not Authorised to Delete This Product!!.",
+          msg: "You are not Authorised to Delete This Product!!. Only Admin Can Do.",
         });
       }
       Product.deleteOne({ _id: productId, userId: req.user._id })

@@ -45,7 +45,7 @@ app.use(
 );
 
 //Storing a user in req Object
-app.use(sessionUser);
+// app.use(sessionUser);
 
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1", userRoutes);

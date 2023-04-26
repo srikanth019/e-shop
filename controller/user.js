@@ -4,6 +4,7 @@ const Order = require("../models/order");
 const transporter = require('../utils/email');
 
 exports.getProducts = (req, res, next) => {
+  console.log(req.user);
   Product.find().populate('userId').skip(0).limit(2).sort({createdAt : -1})
     .then((products) => {
       console.log("Products Fetched");
@@ -53,11 +54,12 @@ exports.cartProducts = (req, res) => {
 };
 
 exports.postCart = (req, res, next) => {
+  console.log(req.user);
   const prodId = req.params.id;
   // Product.findById({ _id: prodId })
   Product.findById(prodId)
     .then((product) => {
-      // console.log(product);
+      if(!product) throw new Error("Product not found");
       return req.user.addToCart(product);
     })
     .then((result) => {
@@ -65,6 +67,7 @@ exports.postCart = (req, res, next) => {
       res.send({ msg: "Product added to cart", status: result });
     })
     .catch((err) => {
+      res.status(500).json({error: err.message})
       console.log(err);
     });
 };

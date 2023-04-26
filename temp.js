@@ -27,7 +27,5 @@
 //   console.log(err);
 // })
 
-let a = 2;
-let b = a;
-a = 3;
-console.log(b);
+app.use(express.urlencoded({ extended: true }));
+
