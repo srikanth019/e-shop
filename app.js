@@ -1,56 +1,27 @@
 const express = require("express"); // To Configure the Routes and Server Logic
-
 require("dotenv").config(); // to Srore the Env Variables
-
-const session = require("express-session"); //For Creating Sessions
-
-const compression = require('compression');
-
-const MogoStore = require("connect-mongodb-session")(session); //To store Sessions in Database
-
+const compression = require("compression");
 const bodyparser = require("body-parser");
-
-const connect = require("./server");
+const connect = require("./db");
 
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/authentication");
 const pageNotFound = require("./middleware/404");
-const sessionUser = require("./middleware/session-user");
 
 const port = process.env.PORT;
-const MongoURL = process.env.MONGO_URL;
-
 const app = express();
-
-const store = new MogoStore({
-  uri: MongoURL,
-  collection: "sessions",
-});
 
 //for getting input json data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
-
 app.use(express.static("public"));
-
-// session Middleware
-app.use(
-  session({
-    secret: "keepitsecret",
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-  })
-);
-
 app.use(compression());
-// app.use(sessionUser);
 
 app.use("/api/v1/admin", adminRoutes);
-app.use("/api/v1", userRoutes);
+app.use("/api/v1/user", userRoutes);
 app.use("/api/v1", authRoutes);
 app.use(pageNotFound);
 
@@ -58,7 +29,7 @@ const start = async () => {
   try {
     await connect();
     app.listen(port, () => {
-      console.log("listening on port:",port);
+      console.log("listening on port:", port);
     });
   } catch (error) {
     console.error(error);
@@ -67,4 +38,3 @@ const start = async () => {
 };
 
 start();
-

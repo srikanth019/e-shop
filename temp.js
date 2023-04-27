@@ -27,23 +27,20 @@
 //   console.log(err);
 // })
 
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.urlencoded({ extended: true }));
 
-var redis = require('redis');
-var JWTR =  require('jwt-redis').default;
-var redisClient = redis.createClient();
-var jwtr = new JWTR(redisClient);
+// text = `<h1>You are Successfully Changed Your Password.</h1>
+//     <p>Your New Password is: "${newPassword}" </p>
+//     <p>Thank You</p>
+//   `;
+//       sendEmail(result.email, "Password Changed", text);
+//       res.json({ msg: "Your Password Is Successfullt Changed" });
 
-jwtr.sign(payload, secret)
-    .then((token)=>{
-            // your code
-    })
-    .catch((error)=>{
-            // error handling
-    });
-
-jwtr.verify(token, secret);
+const express = require("express");
+const app = express();
 
 
-jwtr.destroy(token)
 
+app.listen(3001, () => {
+  console.log("server started");
+});

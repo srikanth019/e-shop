@@ -1,11 +1,15 @@
 const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require("../models/order");
-const transporter = require('../utils/email');
+const sendEmail = require("../utils/email");
 
 exports.getProducts = (req, res, next) => {
   console.log(req.user);
-  Product.find().populate('userId').skip(0).limit(2).sort({createdAt : -1})
+  Product.find()
+    .populate("userId")
+    .skip(0)
+    .limit(2)
+    .sort({ createdAt: -1 })
     .then((products) => {
       console.log("Products Fetched");
       res.status(200).json({ msg: "Products Fetched", products: products });
@@ -59,7 +63,7 @@ exports.postCart = (req, res, next) => {
   // Product.findById({ _id: prodId })
   Product.findById(prodId)
     .then((product) => {
-      if(!product) throw new Error("Product not found");
+      if (!product) throw new Error("Product not found");
       return req.user.addToCart(product);
     })
     .then((result) => {
@@ -67,7 +71,7 @@ exports.postCart = (req, res, next) => {
       res.send({ msg: "Product added to cart", status: result });
     })
     .catch((err) => {
-      res.status(500).json({error: err.message})
+      res.status(500).json({ error: err.message });
       console.log(err);
     });
 };
@@ -132,22 +136,9 @@ exports.postOrder = async (req, res, next) => {
       const CreatedOrder = await order.save();
       await req.user.clearCart();
       console.log("Order created");
-      var mailOptions = {
-        to: email,
-        from: "mailto:srikanth.golla@brainvire.com",
-        subject: "Your Order has been Successfully Placed.",
-        text: "Hello from Node-Project",
-        html: `<h1>You will get your order as soon as Possible </h1>
-          <p>Thank You</p>
-      `,
-      };
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log("Email sent: " + info.response);
-        }
-      });
+      const text = `<h1>You will get your order as soon as Possible </h1>
+      <p>Thank You</p>`;
+      sendEmail(email, "Your Order has been Successfully Placed.",text);
       res.json({ msg: "Order created", order: CreatedOrder });
     }
   } catch (err) {

@@ -24,3 +24,10 @@ const sendEmail = async (email, subject, text) => {
 };
 
 module.exports = sendEmail;
+// let verifyEmailUrl;
+// let email;
+// const verificationEmailText = `<p> To Create Your Account Please Verify Email </p>
+//   <p> Click <a href="${verifyEmailUrl}"> here </a>to verify your email</p>`;
+// const verificationEmail = sendEmail(email, "Email Verification", verificationEmailText);
+
+
