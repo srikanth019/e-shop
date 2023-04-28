@@ -1,11 +1,9 @@
 const Product = require("../models/product");
 
 exports.getProducts = (req, res, next) => {
-  // console.log(req.user);
   Product.find({ userId: req.user._id })
     .then((products) => {
       console.log("Products Fetched");
-      // console.log(products);
       res.status(200).json({ msg: "Admin Products Fetched", products: products });
     })
     .catch((err) => {

@@ -58,7 +58,6 @@ exports.postSignUp = async (req, res, next) => {
       password: hashPass,
       profilePic: profilePic,
       token: token,
-      tokenExpiration: Date.now() + 3600000,
       cart: { items: [] },
     });
     const response = await user.save();
@@ -82,7 +81,6 @@ exports.userVerification = (req, res, next) => {
   User.findOne({
     _id: userId,
     token: token,
-    tokenExpiration: { $gt: Date.now() },
   })
     .then((verifyUser) => {
       if (!verifyUser) {
@@ -125,11 +123,9 @@ exports.postLogin = (req, res, next) => {
     .then((match) => {
       // console.log(match);
       if (match) {
-        // req.session.isLogin = true;
         const token = jwt.sign({ loadedUser }, ACCESS_TOKEN_SECRET, {
           expiresIn: "1h",
         });
-        // req.session.user = loadedUser;
         res.json({ msg: "Login Successfully", token: token });
       }
       if (!match) {
@@ -137,7 +133,7 @@ exports.postLogin = (req, res, next) => {
       }
     })
     .catch((err) => {
-      // console.log(err);
+      console.log(err);
     });
 };
 
@@ -150,17 +146,16 @@ exports.resetPasswordEmail = (req, res, next) => {
         return res.json({ msg: "Please enter a valid Email" });
       }
       user.token = token;
-      user.tokenExpiration = Date.now() + 300000;
-      // console.log(user);
+      user.tokenExpiration = Date.now() + 3600000 * 3;
       return user.save();
     })
     .then((resetUser) => {
-      const resetPasswordUrl = `${process.env.BASE_URL}/api/v1/reset-password/${resetUser._id}/${token}`;
+      const resetPasswordUrl = `${process.env.BASE_URL}/api/v1/new-password/${resetUser._id}/${token}`;
 
       text = `<p> You are requested to reset your Passsword</p>
      <p> Click <a href="${resetPasswordUrl}"> here </a>to reset the password</p>`;
       sendEmail(email, "Password Reset", text);
-      res.json({ msg: "Email is sent to reset password" });
+      res.json({ msg: "Reset Email sent." });
     })
     .catch((err) => {
       console.log(err);
@@ -171,26 +166,27 @@ exports.resetPassword = (req, res, next) => {
   const newPassword = req.body.newPassword;
   const userId = req.params.id;
   const token = req.params.token;
+  let resetUser;
   User.findOne({
     _id: userId,
     token: token,
+    tokenExpiration: { $gt: Date.now() },
   })
     .then((user) => {
-      console.log(user);
+      resetUser = user;
       if (!user) {
         return res.send("Invalid Token");
       }
-      if (Date.now() > user.tokenExpiration) {
-        return res.send("Your Token is Expired");
-      }
-      const hashNewPass = bcrypt.hash(newPassword, 12);
-      user.password = hashNewPass;
-      user.token = undefined;
-      user.tokenExpiration = undefined;
-      return user.save();
+      console.log(newPassword);
+      return bcrypt.hash(newPassword, 12);
+    })
+    .then(hashedPass => {
+      resetUser.password = hashedPass;
+      resetUser.token = undefined;
+      resetUser.tokenExpiration = undefined;
+      return resetUser.save();
     })
     .then((result) => {
-      console.log(result);
       text = `<h1>You are Successfully Changed Your Password.</h1>
     <p>Your New Password is: "${newPassword}" </p>
     <p>Thank You</p>
@@ -210,8 +206,5 @@ exports.postLogout = (req, res, next) => {
   }
   let token = bearerHeader.split(" ")[1];
 
-  req.logOut();
-  // token = null;
-  // console.log(token);
   res.send({ msg: "Logout Successfully" });
 };

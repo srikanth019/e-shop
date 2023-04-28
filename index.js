@@ -1,8 +1,7 @@
 const express = require("express"); // To Configure the Routes and Server Logic
 require("dotenv").config(); // to Srore the Env Variables
 const compression = require("compression");
-const bodyparser = require("body-parser");
-const connect = require("./db");
+const connect = require("./config/db");
 
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/user");
@@ -15,8 +14,6 @@ const app = express();
 //for getting input json data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(compression());
 
