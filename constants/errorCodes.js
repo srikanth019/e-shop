@@ -1,0 +1,3 @@
+exports.PAGE_NOT_FOUND = 404;
+exports.SERVER_ERROR = 500;
+exports.INVALID_SUBSCRIPTION = 300;

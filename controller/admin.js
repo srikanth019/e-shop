@@ -1,13 +1,24 @@
+const {
+  PRODUCT_NOT_FOUND,
+  AUTHORISION_MSG,
+  ADMIN_PRODUCTS,
+  PRODUCT_CREATED,
+  PRODUCTS,
+  UPDATE,
+  DELETED,
+} = require("../constants/msg");
 const Product = require("../models/product");
 
 exports.getProducts = (req, res, next) => {
-  Product.find({ userId: req.user._id })
+  Product.find({ userI: req.user._id })
     .then((products) => {
       console.log("Products Fetched");
-      res.status(200).json({ msg: "Admin Products Fetched", products: products });
+      res.status(200).json({ msg: ADMIN_PRODUCTS, products: products });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -28,24 +39,26 @@ exports.postProduct = (req, res, next) => {
     .save()
     .then((result) => {
       console.log("product created");
-      res.status(201).json({ msg: "Product Created", product: result });
+      res.status(201).json({ msg: PRODUCT_CREATED, product: result });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
 exports.getProduct = (req, res, next) => {
   const productId = req.params.id;
-  Product.find({ _id: productId })
+  Product.findOne({ _id: productId })
     .then((product) => {
       if (!product) {
-        res.send("Product not found with this Id:", productId);
+        throw new Error(PRODUCT_NOT_FOUND);
       }
-      res.status(200).json({ msg: "Product Fetched", product: product });
+      res.status(200).json({ msg: PRODUCTS, product: product });
     })
     .catch((err) => {
-      console.log(err);
+      return next(err);
     });
 };
 
@@ -59,54 +72,51 @@ exports.updateProduct = (req, res, next) => {
   Product.findByIdAndUpdate({ _id: productId })
     .then((product) => {
       if (product.userId.toString() !== req.user._id.toString()) {
-        return res.json({
-          msg: "You are not Authorised to edit This Product!!. Only Admin Can Do.",
-        });
+        const error = new Error(AUTHORISION_MSG);
+        error.httpStatusCode = 403;
+        throw error;
       }
       product.title = updatedTitle;
       product.imageUrl = updatedImageUrl;
       product.price = updatedPrice;
       product.description = UpdatedDescription;
-      // console.log(product);
       return product
         .save()
         .then((updatedProduct) => {
           console.log("product updated");
-          res
-            .status(201)
-            .json({ msg: "Product Updated", product: updatedProduct });
+          res.status(201).json({ msg: UPDATE, product: updatedProduct });
         })
         .catch((err) => {
-          console.log(err);
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
         });
     })
     .catch((err) => {
-      console.log(err);
+     return next(err);
     });
 };
 
 exports.deleteProduct = (req, res, next) => {
   const productId = req.params.id;
-  Product.find({_id: productId})
+  Product.find({ _id: productId })
     .then((product) => {
-      // console.log(product);
       if (product.userId !== req.user._id.toString()) {
-        return res.json({
-          msg: "You are not Authorised to Delete This Product!!. Only Admin Can Do.",
-        });
+        const error = new Error(AUTHORISION_MSG);
+        error.httpStatusCode = 403;
+        throw error;
       }
       Product.deleteOne({ _id: productId, userId: req.user._id })
         .then((result) => {
-          // if (!product) {
-          //   res.json({ msg: "Product is Not Founded" });
-          // }
-          res.json({ msg: "Product Deleted", status: result });
+          res.json({ msg: DELETED, status: result });
         })
         .catch((err) => {
-          console.log(err);
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
         });
     })
     .catch((err) => {
-      console.log(err);
+     return next(err);
     });
 };

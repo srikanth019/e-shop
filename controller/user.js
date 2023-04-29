@@ -41,7 +41,6 @@ exports.cartProducts = (req, res) => {
       select: "title price description imageUrl userId",
     })
     .then((cartItems) => {
-      // console.log(cartItems);
       if (cartItems[0].cart.items.length <= 0) {
         return res.json({ msg: "No Products in Cart" });
       }
@@ -81,7 +80,7 @@ exports.deleteProductFromCart = (req, res, next) => {
   req.user
     .removeFromCart(prodId)
     .then((result) => {
-      console.log(result);
+      // console.log(result);
       res.json({ msg: "Product deleted From Cart", result: result });
     })
     .catch((err) => {

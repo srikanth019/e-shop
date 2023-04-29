@@ -108,7 +108,6 @@ exports.postLogin = (req, res, next) => {
   let loadedUser;
   User.findOne({ email: email })
     .then((user) => {
-      // console.log(user);
       if (!user) {
         return res.json({ msg: "Incorrect E-Mail!!!" });
       }
@@ -121,7 +120,6 @@ exports.postLogin = (req, res, next) => {
       return bcrypt.compare(password, user.password);
     })
     .then((match) => {
-      // console.log(match);
       if (match) {
         const token = jwt.sign({ loadedUser }, ACCESS_TOKEN_SECRET, {
           expiresIn: "1h",

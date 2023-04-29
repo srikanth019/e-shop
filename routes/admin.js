@@ -10,7 +10,7 @@ router.get("/", isAuth, adminControllere.getProducts);
 
 router.post("/", isAuth, adminControllere.postProduct);
 
-router.get("/:id", isAuth, adminControllere.getProduct);
+router.get("/:id", adminControllere.getProduct);
 
 router.patch("/:id", isAuth, adminControllere.updateProduct);
 
